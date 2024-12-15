@@ -34,7 +34,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
     address = models.CharField(max_length=200, blank=True, null=True)
-
+    events_created = models.IntegerField(default=0)
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
