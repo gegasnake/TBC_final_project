@@ -1,4 +1,7 @@
+from django.conf.urls.static import static
 from django.urls import path
+
+from TBC_final_project import settings
 from .views import (
     EventCreateAPIView, EventListAPIView, EventRetrieveAPIView, EventUpdateAPIView, EventDeleteAPIView,
     RSVPView, MyEventsView, EventAttendeesView, LikeEventView,
@@ -47,3 +50,7 @@ urlpatterns = [
     path('events/<int:event_id>/comments/<int:cid>/', DeleteEventCommentView.as_view(), name='delete-event-comment'),
     path('events/<int:event_id>/reviews/', SubmitEventReviewView.as_view(), name='submit-event-review'),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

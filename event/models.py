@@ -61,6 +61,9 @@ class EventMedia(models.Model):
     media_type = models.CharField(max_length=50, choices=[('image', 'Image'), ('video', 'Video')], default='image')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.file.name
+
 
 class EventComment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

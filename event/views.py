@@ -285,15 +285,24 @@ class EventMediaUploadRetrieveView(APIView):
         """
         event = get_object_or_404(Event, id=event_id)
 
-        media_files = request.FILES.getlist('media')  # For handling multiple files
+        media_files = request.FILES.getlist('file')  # Multiple files
+        print(request.FILES)
         if not media_files:
             return Response({"error": "No media files uploaded."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Save media files to the event
+        media_saved = []
         for media_file in media_files:
-            media = EventMedia.objects.create(event=event, file=media_file)
+            try:
+                media = EventMedia.objects.create(event=event, file=media_file)
+                media_saved.append(media.file.url)  # Save URL or any relevant data
+            except Exception as e:
+                return Response({"error": f"Failed to upload {media_file.name}: {str(e)}"},
+                                status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"message": "Media uploaded successfully."}, status=status.HTTP_201_CREATED)
+        return Response({
+            "message": "Media uploaded successfully.",
+            "media_files": media_saved
+        }, status=status.HTTP_201_CREATED)
 
 
 class MyRSVPEventsView(APIView):
