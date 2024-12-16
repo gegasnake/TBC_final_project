@@ -1,7 +1,5 @@
-from django.conf.urls.static import static
 from django.urls import path
 
-from TBC_final_project import settings
 from .views import (
     EventCreateAPIView, EventListAPIView, EventRetrieveAPIView, EventUpdateAPIView, EventDeleteAPIView,
     RSVPView, MyEventsView, EventAttendeesView, LikeEventView,
@@ -52,5 +50,4 @@ urlpatterns = [
 ]
 
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

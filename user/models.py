@@ -27,6 +27,9 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    followers = models.ManyToManyField(
+        'self', symmetrical=False, related_name='following', blank=True
+    )
     uuid_field = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, blank=True, null=True)
@@ -34,7 +37,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(auto_now_add=True)
     address = models.CharField(max_length=200, blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     events_created = models.IntegerField(default=0)
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
