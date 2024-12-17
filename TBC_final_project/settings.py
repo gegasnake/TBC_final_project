@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     # all apps
     'user',
     'event',
-    'notifications'
+    'notifications',
 ]
 
 REST_FRAMEWORK = {
@@ -171,7 +171,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('SYSTEM_EMAIL')
 EMAIL_HOST_PASSWORD = config('SYSTEM_EMAIL_PASSWORD')
-
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 CACHES = {
     'default': {
@@ -183,3 +183,9 @@ CACHES = {
         'TIMEOUT': 60,
     }
 }
+
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'

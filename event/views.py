@@ -14,6 +14,7 @@ from .models import Event, Tag, Category, EventMedia, EventReview, EventComment
 from .serializers import EventSerializer
 
 from rest_framework.pagination import PageNumberPagination
+from notifications.tasks import send_event_creation_email
 
 
 class CustomPagination(PageNumberPagination):
@@ -96,6 +97,39 @@ class EventUpdateAPIView(generics.UpdateAPIView):
     serializer_class = EventSerializer
     lookup_field = "id"
     permission_classes = [permissions.IsAuthenticated]
+
+    def perform_update(self, serializer):
+        # Get the previous status before updating
+        event = self.get_object()
+        previous_status = event.status
+
+        # Perform the update
+        updated_event = serializer.save()
+        print(previous_status)
+        print(updated_event.status)
+        # Check if the status was updated to "Canceled"
+        if previous_status != "canceled" and updated_event.status == "canceled":
+            # Send emails asynchronously via Celery
+            self.send_cancellation_emails(updated_event)
+
+    def send_cancellation_emails(self, event):
+        # Assuming there's a ManyToMany field `registered_users` in Event model
+        registered_users = event.attendees.all()
+
+        subject = f"Event '{event.title}' Canceled"
+        message = (
+            f"Dear Participant,\n\n"
+            f"We regret to inform you that the event '{event.title}', "
+            f"scheduled for {event.start_date}, has been canceled.\n\n"
+            "We apologize for any inconvenience caused.\n\n"
+            "Thank you."
+        )
+
+        # Trigger the Celery task for each registered user
+        for user in registered_users:
+            print(user)
+            if user.email:  # Ensure user has an email
+                send_event_creation_email.delay(user.email, subject, message)
 
 
 # Delete an event
