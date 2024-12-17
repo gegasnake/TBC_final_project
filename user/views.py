@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import CustomUser
-from .serializers import CustomUserSerializer, UserSerializer, UserProfileSerializer, FollowerFollowingSerializer
+from .serializers import CustomUserSerializer, UserProfileSerializer, FollowerFollowingSerializer
 
 
 class RegisterView(CreateAPIView):
@@ -54,7 +54,6 @@ class FollowersListView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Get all users who follow the authenticated user
         return self.request.user.followers.all()
 
 
@@ -63,5 +62,4 @@ class FollowingsListView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Get all users the authenticated user is following
         return self.request.user.following.all()

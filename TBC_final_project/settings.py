@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     # all apps
     'user',
     'event',
+    'notifications'
 ]
 
 REST_FRAMEWORK = {
@@ -170,3 +171,15 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('SYSTEM_EMAIL')
 EMAIL_HOST_PASSWORD = config('SYSTEM_EMAIL_PASSWORD')
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://redis:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'TIMEOUT': 60,
+    }
+}

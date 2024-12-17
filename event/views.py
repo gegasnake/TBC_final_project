@@ -1,3 +1,6 @@
+import hashlib
+
+from django.core.cache import cache
 from django.db.models import Q, Count
 from rest_framework import generics, permissions, status
 from rest_framework.generics import get_object_or_404, GenericAPIView
@@ -28,11 +31,26 @@ class EventListAPIView(generics.ListAPIView):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+    def get_cache_key(self, query_params):
+        """
+        Generate a unique cache key based on the query parameters.
+        """
+        query_string = '&'.join(f'{key}={value}' for key, value in query_params.items())
+        return hashlib.md5(query_string.encode('utf-8')).hexdigest()
+
     def get_queryset(self):
         """
-        Optionally restricts the returned events by filtering against
-        query parameters in the request URL.
+        Fetch and cache the queryset based on query parameters.
         """
+        # Generate a unique cache key based on request parameters
+        cache_key = f"events:{self.get_cache_key(self.request.GET)}"
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            print("Returning cached data")
+            return cached_data
+
+        print("Querying database")
         queryset = Event.objects.select_related('category').prefetch_related('tags')
 
         # Get query parameters from the request
@@ -42,7 +60,6 @@ class EventListAPIView(generics.ListAPIView):
         location = self.request.GET.get('location', None)
         tags = self.request.GET.get('tags', None)
 
-        # Apply filters based on query parameters
         if query:
             queryset = queryset.filter(
                 Q(title__icontains=query) | Q(description__icontains=query)
@@ -60,6 +77,8 @@ class EventListAPIView(generics.ListAPIView):
         if tags:
             tag_names = tags.split(',')
             queryset = queryset.filter(tags__name__in=tag_names)
+
+        cache.set(cache_key, queryset, timeout=60)
 
         return queryset
 
